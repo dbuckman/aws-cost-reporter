@@ -15,7 +15,8 @@ RUN chmod +x /app/main
 # # WORKDIR /app
 # RUN chmod +x /app/awscost
 
-CMD ["/app/main"]
+# CMD ["sleep", "60"]
+ENTRYPOINT ["/app/main"]
 # CMD ["echo", "$AWS_ACCESS_KEY_ID"]
 # # CMD ["ls", "-l", "/app"]
 # CMD ["bash", "-c", "/app/awscost"]

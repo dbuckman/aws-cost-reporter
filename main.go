@@ -158,38 +158,38 @@ func main() {
 	var err error
 
 	if marginStr == "" {
-		// Keep this log message to inform the user if no margin is applied
-		log.Println("INFO: AWS_MARGIN environment variable not set. Applying 0% margin.")
+		// log.Println("INFO: AWS_MARGIN environment variable not set. Applying 0% margin.")
 		marginPercent = 0.0
 	} else {
 		marginPercent, err = strconv.ParseFloat(marginStr, 64)
 		if err != nil {
 			// log.Printf("ERROR: Parsing AWS_MARGIN value '%s': %v. Applying 0% margin.", marginStr, err)
 			marginPercent = 0.0
-		} else if marginPercent < 0 {
-			// Keep this log message to inform the user about the applied discount
-			log.Printf("INFO: Applying negative AWS_MARGIN (discount) of %.2f%%", marginPercent)
-		} else {
-			// Keep this log message to inform the user about the applied markup
-			// log.Printf("INFO: Applying AWS_MARGIN of %.2f%%", marginPercent)
 		}
+		// else if marginPercent < 0 {
+		// 	log.Printf("INFO: Applying negative AWS_MARGIN (discount) of %.2f%%", marginPercent)
+		// } else {
+		// 	log.Printf("INFO: Applying AWS_MARGIN of %.2f%%", marginPercent)
+		// }
 	}
 	markupMultiplier := 1.0 + (marginPercent / 100.0)
 	// ----------------------------------------------------
 
 	// --- Date Calculation ---
-	// Using hardcoded date for consistency since current time was provided
-	// now := time.Now()
-	now := time.Date(2025, time.May, 1, 12, 0, 8, 0, time.FixedZone("EDT", -4*60*60)) // Thursday, May 1, 2025 12:00:08 PM EDT
-	log.Printf("INFO: Current script time set to: %s", now.Format(time.RFC1123Z))
+	// Use the ACTUAL current time now!
+	now := time.Now()
+	// Remove the log message that printed the hardcoded time
+	// log.Printf("INFO: Current script time set to: %s", now.Format(time.RFC1123Z)) // No longer needed
 
-	currentYear, currentMonth, currentDay := now.Date()
+	currentYear, currentMonth, currentDay := now.Date() // Get components from the actual current time
+
+	// Calculations remain the same, but are now based on the real 'now'
 	currentMonthStart := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, now.Location())
-	currentMonthEndAPI := currentMonthStart.AddDate(0, 1, 0).Format("2006-01-02") // 2025-06-01
-	currentMonthStartStr := currentMonthStart.Format("2006-01-02")                // 2025-05-01
-	previousMonthStart := currentMonthStart.AddDate(0, -1, 0)                     // 2025-04-01
-	previousMonthEndAPI := currentMonthStartStr                                   // 2025-05-01
-	previousMonthStartStr := previousMonthStart.Format("2006-01-02")              // 2025-04-01
+	currentMonthEndAPI := currentMonthStart.AddDate(0, 1, 0).Format("2006-01-02")
+	currentMonthStartStr := currentMonthStart.Format("2006-01-02")
+	previousMonthStart := currentMonthStart.AddDate(0, -1, 0)
+	previousMonthEndAPI := currentMonthStartStr
+	previousMonthStartStr := previousMonthStart.Format("2006-01-02")
 	// ---------------------
 
 	// Load default AWS configuration
@@ -207,14 +207,13 @@ func main() {
 	if err != nil {
 		log.Printf("ERROR: fetching previous month's data: %v", err)
 	} else {
-		// Pass multiplier, but not marginPercent as it's not needed for display logic anymore
 		processAndDisplayResults(fmt.Sprintf("Previous Month (%s)", previousMonthStart.Format("Jan 2006")), prevMonthResults, reportMetrics, reportGroupBy, markupMultiplier)
 	}
 
 	// --- Fetch and Display Current Month Data (handle day 1) ---
+	// This check now uses the *actual* current day
 	if currentDay == 1 {
 		fmt.Println("--- Current Month Results ---")
-		// This message remains as it's about data availability, not margin.
 		fmt.Println("Today is the 1st of the month. Check back tomorrow to see this month's usage data.")
 		fmt.Println(string(make([]byte, 30, 30))) // Separator
 	} else {
@@ -223,7 +222,6 @@ func main() {
 		if err != nil {
 			log.Printf("ERROR: fetching current month's data: %v", err)
 		} else {
-			// Pass multiplier, but not marginPercent
 			processAndDisplayResults(fmt.Sprintf("Current Month MTD (%s)", currentMonthStart.Format("Jan 2006")), currentMonthResults, reportMetrics, reportGroupBy, markupMultiplier)
 		}
 	}
