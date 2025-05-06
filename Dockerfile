@@ -9,14 +9,12 @@ COPY main.go ./
 RUN go build -o /app/main .
 RUN chmod +x /app/main
 
-# FROM alpine:3.14
-# RUN mkdir -p /app
-# COPY --from=builder /app/main /app/awscost
+FROM alpine:3.14
+RUN apk add libc6-compat
+RUN mkdir -p /app
+COPY --from=builder /app/main /app/awscost
 # # WORKDIR /app
-# RUN chmod +x /app/awscost
+RUN chmod +x /app/awscost
 
-# CMD ["sleep", "60"]
-ENTRYPOINT ["/app/main"]
-# CMD ["echo", "$AWS_ACCESS_KEY_ID"]
-# # CMD ["ls", "-l", "/app"]
-# CMD ["bash", "-c", "/app/awscost"]
+# ENTRYPOINT ["/app/main"]
+ENTRYPOINT ["/app/awscost"]
